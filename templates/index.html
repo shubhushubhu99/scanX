@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>scanX – Website Security Analyzer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>scan<span>X</span></h1>
+    <p class="tagline">Simple. Fast. Honest website security analysis.</p>
+
+    <form action="/analyze" method="POST">
+        <input 
+            type="text" 
+            name="target" 
+            placeholder="example.com" 
+            required
+        >
+        <button type="submit">Analyze</button>
+    </form>
+
+    <p class="note">
+        Uses publicly available information only. No intrusive scanning.
+    </p>
+</div>
+
+</body>
+</html>
