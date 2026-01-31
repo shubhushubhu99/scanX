@@ -7,6 +7,7 @@ from core.experience_miner import mine_experiences
 from core.risk_engine import evaluate_risk
 from core.policy_analyzer import analyze_policies
 from core.policy_mismatch import detect_policy_mismatch
+from core.trust_dimensions import evaluate_trust_dimensions
 from agents.deep_explainer import explain_trust
 
 analyze_api = Blueprint("analyze_api", __name__)
@@ -30,22 +31,25 @@ def analyze():
     domain = normalize_domain(raw_domain)
 
     try:
-        # 1️⃣ OSINT
+        # 1️⃣ OSINT collection
         osint = collect_public_signals(domain)
 
-        # 2️⃣ Live inspection
+        # 2️⃣ Live site inspection
         live = inspect_site(domain)
 
-        # 3️⃣ Policy quality
+        # 3️⃣ Policy quality analysis
         policy_quality = analyze_policies(domain, live)
 
         # 4️⃣ Experience mining
         experience = mine_experiences(osint.get("evidence", {}))
 
-        # 5️⃣ Policy vs complaint mismatch  ✅ DEFINE IT
-        policy_mismatches = detect_policy_mismatch(policy_quality, experience)
+        # 5️⃣ Policy vs complaint mismatch
+        policy_mismatches = detect_policy_mismatch(
+            policy_quality,
+            experience
+        )
 
-        # 6️⃣ Risk evaluation
+        # 6️⃣ Baseline risk evaluation
         risk = evaluate_risk(osint)
 
         # 7️⃣ AI explanation (graceful fallback)
@@ -62,13 +66,22 @@ def analyze():
             ai_result = {
                 "analysis": (
                     "AI-based explanation is temporarily unavailable due to API limits. "
-                    "The assessment above is based on live inspection, public intelligence, "
-                    "policy analysis, and user experience patterns."
+                    "The assessment is derived from OSINT, live inspection, "
+                    "policy analysis, and experience patterns."
                 ),
                 "risk_level": risk["baseline_risk"]["risk_level"],
                 "confidence": risk["baseline_risk"]["confidence"],
                 "ai_error": str(ai_error)
             }
+
+        # 8️⃣ Trust Dimension Engine
+        trust_dimensions = evaluate_trust_dimensions(
+            osint=osint,
+            experience=experience,
+            live=live,
+            policy_quality=policy_quality,
+            policy_mismatches=policy_mismatches
+        )
 
         return jsonify({
             "domain": domain,
@@ -82,8 +95,9 @@ def analyze():
             "live": live,
             "experience": experience,
             "policy_quality": policy_quality,
-            "policy_mismatches": policy_mismatches,  # ✅ NOW EXISTS
-            "risk": risk
+            "policy_mismatches": policy_mismatches,
+            "risk": risk,
+            "trust_dimensions": trust_dimensions
         })
 
     except Exception as e:

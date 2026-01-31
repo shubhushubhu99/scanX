@@ -39,6 +39,13 @@
       <p id="riskReason"></p>
     </section>
 
+    <!-- TRUST DIMENSIONS -->
+<section id="trustDimensionsPanel" class="card wide hidden">
+  <h3>Trust Dimension Analysis</h3>
+  <div id="trustDimensions"></div>
+</section>
+
+
     <!-- GRID -->
     <section class="grid">
 
@@ -75,6 +82,15 @@
         <h3>AI Trust Explanation</h3>
         <p id="aiExplanation"></p>
       </div>
+<!-- REFERENCES MODAL -->
+<div id="referenceModal" class="modal hidden" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <h3 id="modalTitle">References</h3>
+    <ul id="modalLinks"></ul>
+    <button type="button" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
 
     </section>
   </main>

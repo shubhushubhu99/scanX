@@ -1,3 +1,5 @@
+let globalOsint = null;
+
 function startScan() {
   const url = document.getElementById("urlInput").value.trim();
   const category = document.getElementById("categoryInput").value;
@@ -32,6 +34,7 @@ function startScan() {
 function render(data) {
   // SAFETY CHECK
   if (!data) return;
+globalOsint = data.osint;
 
   /* =======================
      SHOW DASHBOARD
@@ -68,29 +71,31 @@ function render(data) {
     data.live?.signals?.has_terms && "Terms & conditions available"
   ]);
 
-  /* =======================
-     CONCERNS WITH EVIDENCE
-  ======================= */
-  const concernsEl = document.getElementById("concerns");
-  concernsEl.innerHTML = "";
+/* =======================
+   KEY CONCERNS
+======================= */
+const concernsEl = document.getElementById("concerns");
+concernsEl.innerHTML = "";
 
-  if (data.experience) {
-    Object.entries(data.experience).forEach(([key, value]) => {
-      if (value.count >= 3 && value.evidence?.length) {
-        const links = value.evidence
-          .map(ev => `<a href="${ev.url}" target="_blank">${ev.platform}</a>`)
-          .join(" • ");
+if (data.experience) {
+  Object.entries(data.experience).forEach(([key, value]) => {
+    if (value.count >= 3) {
+      concernsEl.innerHTML += `
+        <li>
+          <strong>${key.replace(/_/g, " ")}</strong>
+          (${value.count} mentions)
+          <br />
+          <button class="reference-btn"
+            onclick="showReferences('${key}')">
+            View references
+          </button>
+        </li>
+      `;
+    }
+  });
+}
 
-        concernsEl.innerHTML += `
-          <li>
-            <strong>${key.replace(/_/g, " ")}</strong> reported frequently
-            <br />
-            <small>Evidence: ${links}</small>
-          </li>
-        `;
-      }
-    });
-  }
+
 
   /* =======================
      EXPERIENCE BADGES
@@ -159,6 +164,41 @@ function render(data) {
     mismatchPanel.classList.add("hidden");
   }
 
+
+  /* =======================
+     TRUST DIMENSIONS
+  ======================= */
+
+  const trustPanel = document.getElementById("trustDimensionsPanel");
+  const trustBox = document.getElementById("trustDimensions");
+
+  trustBox.innerHTML = "";
+
+  if (data.trust_dimensions) {
+    Object.entries(data.trust_dimensions).forEach(([key, value]) => {
+      const statusClass =
+        "status-" + value.status.toLowerCase().replace(/\s+/g, "-");
+
+      trustBox.innerHTML += `
+        <div class="trust-row">
+          <div class="trust-name">${key.replace(/_/g, " ")}</div>
+          <div class="trust-status ${statusClass}">
+            ${value.status}
+          </div>
+          <div class="trust-reason">
+            ${value.reason}
+          </div>
+        </div>
+      `;
+    });
+
+    trustPanel.classList.remove("hidden");
+  } else {
+    trustPanel.classList.add("hidden");
+  }
+
+
+
   /* =======================
      AI EXPLANATION
   ======================= */
@@ -177,4 +217,61 @@ function fillList(id, items) {
   items.filter(Boolean).forEach(item => {
     el.innerHTML += `<li>${item}</li>`;
   });
+}
+
+function showReferences(concernKey) {
+  const modal = document.getElementById("referenceModal");
+  const list = document.getElementById("modalLinks");
+  const title = document.getElementById("modalTitle");
+
+  list.innerHTML = "";
+  title.innerText = `References for ${concernKey.replace(/_/g, " ")}`;
+
+  if (!globalOsint || !globalOsint.evidence) {
+    list.innerHTML = `<li>No reference data available.</li>`;
+    modal.classList.remove("hidden");
+    return;
+  }
+
+  const concernPlatformMap = {
+    customer_support_issues: ["Quora", "Trustpilot", "Forums"],
+    delivery_issues: ["Reddit", "Trustpilot", "Forums"],
+    security_concerns: ["Security", "Reddit"],
+    payment_issues: ["Trustpilot", "Forums"]
+  };
+
+  let found = false;
+  const platforms = concernPlatformMap[concernKey] || [];
+
+  // 1️⃣ Try mapped platforms first
+  platforms.forEach(platform => {
+    const items = globalOsint.evidence[platform] || [];
+    items.forEach(item => {
+      found = true;
+      list.innerHTML += `
+        <li>
+          <a href="${item.link}" target="_blank">
+            ${platform}: ${item.title || item.link}
+          </a>
+        </li>
+      `;
+    });
+  });
+
+  // 2️⃣ Fallback: show any available evidence
+  if (!found) {
+    Object.entries(globalOsint.evidence).forEach(([platform, items]) => {
+      items.slice(0, 2).forEach(item => {
+        list.innerHTML += `
+          <li>
+            <a href="${item.link}" target="_blank">
+              ${platform}: ${item.title || item.link}
+            </a>
+          </li>
+        `;
+      });
+    });
+  }
+
+  modal.classList.remove("hidden");
 }

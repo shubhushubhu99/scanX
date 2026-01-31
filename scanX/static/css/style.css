@@ -188,3 +188,86 @@ li {
 #concerns a:hover {
   text-decoration: underline;
 }
+
+/* TRUST DIMENSIONS */
+.trust-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.03);
+  align-items: center;
+}
+
+.trust-name {
+  font-weight: 500;
+}
+
+.trust-status {
+  text-align: right;
+  font-weight: 600;
+}
+
+.status-strong { color: #22c55e; }
+.status-moderate { color: #facc15; }
+.status-weak,
+.status-elevated,
+.status-concerning { color: #ef4444; }
+.status-normal { color: #60a5fa; }
+
+.trust-reason {
+  grid-column: span 2;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #cbd5f5;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-content {
+  background: #0f172a;
+  padding: 20px;
+  border-radius: 12px;
+  width: 420px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-content ul {
+  margin-top: 10px;
+}
+
+.modal-content a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.modal-content a:hover {
+  text-decoration: underline;
+}
+
+.reference-btn {
+  margin-top: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #1e293b;
+  color: #e5e7eb;
+}
