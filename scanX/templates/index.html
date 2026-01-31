@@ -83,13 +83,22 @@
         <p id="aiExplanation"></p>
       </div>
 <!-- REFERENCES MODAL -->
-<div id="referenceModal" class="modal hidden" onclick="closeModal()">
-  <div class="modal-content" onclick="event.stopPropagation()">
+<div id="referenceModal" class="modal hidden">
+  <div class="modal-overlay"></div>
+
+  <div class="modal-content">
     <h3 id="modalTitle">References</h3>
     <ul id="modalLinks"></ul>
-    <button type="button" onclick="closeModal()">Close</button>
+
+    <button
+      id="closeModalBtn"
+      type="button"
+      class="close-btn">
+      Close
+    </button>
   </div>
 </div>
+
 
 
     </section>

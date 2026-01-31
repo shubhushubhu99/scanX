@@ -275,3 +275,18 @@ function showReferences(concernKey) {
 
   modal.classList.remove("hidden");
 }
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const modal = document.getElementById("referenceModal");
+  const closeBtn = document.getElementById("closeModalBtn");
+  const overlay = modal.querySelector(".modal-overlay");
+
+  closeBtn.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+
+  overlay.addEventListener("click", () => {
+    modal.classList.add("hidden");
+  });
+});

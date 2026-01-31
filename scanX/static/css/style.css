@@ -223,51 +223,39 @@ li {
   color: #cbd5f5;
 }
 
-/* MODAL */
+/* ===== MODAL ===== */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .modal.hidden {
   display: none;
 }
 
+.modal-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+}
+
 .modal-content {
+  position: relative;
+  z-index: 10000;
+  max-width: 420px;
+  margin: 15vh auto;
   background: #0f172a;
   padding: 20px;
   border-radius: 12px;
-  width: 420px;
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
-.modal-content ul {
-  margin-top: 10px;
-}
-
-.modal-content a {
-  color: #60a5fa;
-  text-decoration: none;
-  font-size: 13px;
-}
-
-.modal-content a:hover {
-  text-decoration: underline;
-}
-
-.reference-btn {
-  margin-top: 6px;
-  padding: 4px 10px;
-  font-size: 12px;
+.close-btn {
+  margin-top: 12px;
+  padding: 6px 14px;
   border-radius: 6px;
   border: none;
   cursor: pointer;
-  background: #1e293b;
-  color: #e5e7eb;
+  background: #2563eb;
+  color: white;
 }
