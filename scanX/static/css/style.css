@@ -158,3 +158,33 @@ li {
 
 /* UTIL */
 .hidden { display: none; }
+
+/* POLICY MISMATCH */
+.policy-high {
+  color: #ef4444;
+}
+
+.policy-medium {
+  color: #facc15;
+}
+
+.policy-low {
+  color: #22c55e;
+}
+
+.policy-item {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.03);
+}
+
+#concerns a {
+  color: #60a5fa;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+#concerns a:hover {
+  text-decoration: underline;
+}

@@ -1,66 +1,89 @@
-# api/analyze.py
-
 from flask import Blueprint, request, jsonify
+from urllib.parse import urlparse
 
 from core.reputation import collect_public_signals
 from core.live_inspector import inspect_site
 from core.experience_miner import mine_experiences
 from core.risk_engine import evaluate_risk
-from agents.deep_explainer import explain_trust
 from core.policy_analyzer import analyze_policies
-
+from core.policy_mismatch import detect_policy_mismatch
+from agents.deep_explainer import explain_trust
 
 analyze_api = Blueprint("analyze_api", __name__)
 
 
+def normalize_domain(url: str) -> str:
+    if url.startswith("http"):
+        return urlparse(url).netloc
+    return url
+
+
 @analyze_api.route("/analyze", methods=["POST"])
 def analyze():
-    data = request.get_json()
-    domain = data.get("url", "").strip()
+    data = request.get_json() or {}
+    raw_domain = data.get("url", "").strip()
     category = data.get("category", "general")
 
-    if not domain:
+    if not raw_domain:
         return jsonify({"error": "Invalid domain"}), 400
 
+    domain = normalize_domain(raw_domain)
+
     try:
-        # 1️⃣ Google indexed OSINT
+        # 1️⃣ OSINT
         osint = collect_public_signals(domain)
 
-        # 2️⃣ Live site inspection
+        # 2️⃣ Live inspection
         live = inspect_site(domain)
 
-        #policy quality checker
+        # 3️⃣ Policy quality
         policy_quality = analyze_policies(domain, live)
 
+        # 4️⃣ Experience mining
+        experience = mine_experiences(osint.get("evidence", {}))
 
-        # 3️⃣ Customer experience mining
-        experience = mine_experiences(osint["evidence"])
+        # 5️⃣ Policy vs complaint mismatch  ✅ DEFINE IT
+        policy_mismatches = detect_policy_mismatch(policy_quality, experience)
 
-        # 4️⃣ Rule-based risk evaluation
+        # 6️⃣ Risk evaluation
         risk = evaluate_risk(osint)
 
-        # 5️⃣ Gemini deep explanation
-        ai_result = explain_trust(
-            domain=domain,
-            category=category,
-            osint_data=osint,
-            experience_data=experience,
-            live_inspection=live,
-            risk_result=risk
-        )
+        # 7️⃣ AI explanation (graceful fallback)
+        try:
+            ai_result = explain_trust(
+                domain=domain,
+                category=category,
+                osint_data=osint,
+                experience_data=experience,
+                live_inspection=live,
+                risk_result=risk
+            )
+        except Exception as ai_error:
+            ai_result = {
+                "analysis": (
+                    "AI-based explanation is temporarily unavailable due to API limits. "
+                    "The assessment above is based on live inspection, public intelligence, "
+                    "policy analysis, and user experience patterns."
+                ),
+                "risk_level": risk["baseline_risk"]["risk_level"],
+                "confidence": risk["baseline_risk"]["confidence"],
+                "ai_error": str(ai_error)
+            }
 
         return jsonify({
             "domain": domain,
             "category": category,
+
+            "risk_level": ai_result["risk_level"],
+            "confidence": ai_result["confidence"],
+            "analysis": ai_result["analysis"],
+
             "osint": osint,
             "live": live,
             "experience": experience,
-            "risk": risk,
-            "analysis": ai_result["analysis"],
-            "confidence": ai_result["confidence"],
-            "risk_level": ai_result["risk_level"],
-            "policy_quality": policy_quality
-
+            "policy_quality": policy_quality,
+            "policy_mismatches": policy_mismatches,  # ✅ NOW EXISTS
+            "risk": risk
         })
 
     except Exception as e:

@@ -2,7 +2,10 @@ function startScan() {
   const url = document.getElementById("urlInput").value.trim();
   const category = document.getElementById("categoryInput").value;
 
-  if (!url) return alert("Enter a domain");
+  if (!url) {
+    alert("Enter a domain");
+    return;
+  }
 
   fetch("/api/analyze", {
     method: "POST",
@@ -10,47 +13,168 @@ function startScan() {
     body: JSON.stringify({ url, category })
   })
     .then(res => res.json())
-    .then(data => render(data));
+    .then(data => {
+      console.log("API RESPONSE:", data);
+
+      if (data.error) {
+        alert("Scan failed: " + (data.details || "Unknown error"));
+        return;
+      }
+
+      render(data);
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Network error");
+    });
 }
 
 function render(data) {
-  document.getElementById("dashboard").classList.remove("hidden");
+  // SAFETY CHECK
+  if (!data) return;
 
-  document.getElementById("riskLevel").innerText = data.risk_level;
-  document.getElementById("riskReason").innerText =
-    data.risk.baseline_risk.reason;
+  /* =======================
+     SHOW DASHBOARD
+  ======================= */
+  const dashboard = document.getElementById("dashboard");
+  if (dashboard) dashboard.classList.remove("hidden");
 
+  /* =======================
+     VERDICT
+  ======================= */
+  const verdictEl = document.getElementById("riskLevel");
+  const reasonEl = document.getElementById("riskReason");
+
+  const baselineRisk =
+    data.risk && data.risk.baseline_risk
+      ? data.risk.baseline_risk
+      : null;
+
+  verdictEl.innerText = baselineRisk
+    ? baselineRisk.risk_level
+    : "Verdict unavailable";
+
+  reasonEl.innerText = baselineRisk
+    ? baselineRisk.reason
+    : "Risk explanation unavailable.";
+
+  /* =======================
+     STRENGTHS
+  ======================= */
   fillList("strengths", [
-    data.live.signals.has_help_center && "Help center available",
-    data.live.signals.has_refund_policy && "Refund policy present",
-    data.live.signals.has_privacy_policy && "Privacy policy present",
-    data.live.signals.has_terms && "Terms & conditions available"
+    data.live?.signals?.has_help_center && "Help center available",
+    data.live?.signals?.has_refund_policy && "Refund policy present",
+    data.live?.signals?.has_privacy_policy && "Privacy policy present",
+    data.live?.signals?.has_terms && "Terms & conditions available"
   ]);
 
-  fillList("concerns",
-    Object.entries(data.experience)
-      .filter(([_, v]) => v.count >= 3)
-      .map(([k]) => k.replace(/_/g, " ") + " frequently reported")
-  );
+  /* =======================
+     CONCERNS WITH EVIDENCE
+  ======================= */
+  const concernsEl = document.getElementById("concerns");
+  concernsEl.innerHTML = "";
 
-  const badges = document.getElementById("experienceBadges");
-  badges.innerHTML = "";
-  Object.entries(data.experience).forEach(([k, v]) => {
-    badges.innerHTML += `<span class="badge">${k.replace(/_/g," ")} (${v.count})</span>`;
-  });
+  if (data.experience) {
+    Object.entries(data.experience).forEach(([key, value]) => {
+      if (value.count >= 3 && value.evidence?.length) {
+        const links = value.evidence
+          .map(ev => `<a href="${ev.url}" target="_blank">${ev.platform}</a>`)
+          .join(" • ");
 
-  fillList("opsSignals",
-    Object.entries(data.live.signals)
-      .map(([k, v]) => `${k.replace(/_/g," ")}: ${v ? "Yes" : "No"}`)
-  );
+        concernsEl.innerHTML += `
+          <li>
+            <strong>${key.replace(/_/g, " ")}</strong> reported frequently
+            <br />
+            <small>Evidence: ${links}</small>
+          </li>
+        `;
+      }
+    });
+  }
 
-  fillList("sources", data.osint.platforms_with_mentions);
+  /* =======================
+     EXPERIENCE BADGES
+  ======================= */
+  const badgesEl = document.getElementById("experienceBadges");
+  badgesEl.innerHTML = "";
 
-  document.getElementById("aiExplanation").innerText = data.analysis;
+  if (data.experience) {
+    Object.entries(data.experience).forEach(([k, v]) => {
+      badgesEl.innerHTML += `
+        <span class="badge">${k.replace(/_/g, " ")} (${v.count})</span>
+      `;
+    });
+  }
+
+  /* =======================
+     OPERATIONAL SIGNALS
+  ======================= */
+  if (data.live?.signals) {
+    fillList(
+      "opsSignals",
+      Object.entries(data.live.signals).map(
+        ([k, v]) => `${k.replace(/_/g, " ")}: ${v ? "Yes" : "No"}`
+      )
+    );
+  }
+
+  /* =======================
+     SOURCES
+  ======================= */
+  if (data.osint?.platforms_with_mentions) {
+    fillList("sources", data.osint.platforms_with_mentions);
+  }
+
+  /* =======================
+     POLICY MISMATCHES
+  ======================= */
+  const mismatchPanel = document.getElementById("policyMismatchPanel");
+  const mismatchList = document.getElementById("policyMismatches");
+
+  mismatchList.innerHTML = "";
+
+  const mismatches = data.policy_mismatches || {};
+
+  if (Object.keys(mismatches).length > 0) {
+    Object.entries(mismatches).forEach(([key, value]) => {
+      const cls =
+        value.severity === "High"
+          ? "policy-high"
+          : value.severity === "Medium"
+          ? "policy-medium"
+          : "policy-low";
+
+      mismatchList.innerHTML += `
+        <li class="policy-item ${cls}">
+          <strong>${key.toUpperCase()} POLICY:</strong>
+          ${value.summary}
+          <br />
+          <small>Severity: ${value.severity}</small>
+        </li>
+      `;
+    });
+
+    mismatchPanel.classList.remove("hidden");
+  } else {
+    mismatchPanel.classList.add("hidden");
+  }
+
+  /* =======================
+     AI EXPLANATION
+  ======================= */
+  document.getElementById("aiExplanation").innerText =
+    data.analysis || "AI explanation unavailable.";
 }
 
+/* =======================
+   HELPER
+======================= */
 function fillList(id, items) {
   const el = document.getElementById(id);
+  if (!el || !items) return;
+
   el.innerHTML = "";
-  items.filter(Boolean).forEach(i => el.innerHTML += `<li>${i}</li>`);
+  items.filter(Boolean).forEach(item => {
+    el.innerHTML += `<li>${item}</li>`;
+  });
 }
