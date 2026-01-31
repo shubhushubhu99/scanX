@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>scanX — Trust Intelligence</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo">scanX</span>
+      <span class="subtitle">Trust Intelligence Platform</span>
+    </div>
+  </header>
+
+  <!-- INPUT SECTION -->
+  <section class="input-section">
+    <div class="input-card">
+      <input id="urlInput" placeholder="example.com" />
+      <select id="categoryInput">
+        <option>Online Shopping</option>
+        <option>Online Job</option>
+        <option>Online Service</option>
+        <option>Freelancing</option>
+        <option>College Admission</option>
+      </select>
+      <button onclick="startScan()">Run Deep Scan</button>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <main id="dashboard" class="dashboard hidden">
+
+    <!-- VERDICT -->
+    <section id="verdict" class="verdict">
+      <h1 id="riskLevel"></h1>
+      <p id="riskReason"></p>
+    </section>
+
+    <!-- GRID -->
+    <section class="grid">
+
+      <div class="card fade">
+        <h3>Key Strengths</h3>
+        <ul id="strengths"></ul>
+      </div>
+
+      <div class="card fade delay">
+        <h3>Key Concerns</h3>
+        <ul id="concerns"></ul>
+      </div>
+
+      <div class="card wide fade delay2">
+        <h3>User Experience Signals</h3>
+        <div id="experienceBadges"></div>
+      </div>
+
+      <div class="card fade delay3">
+        <h3>Operational Transparency</h3>
+        <ul id="opsSignals"></ul>
+      </div>
+
+      <div class="card fade delay4">
+        <h3>Public Intelligence Sources</h3>
+        <ul id="sources"></ul>
+      </div>
+
+      <div class="card wide highlight fade delay5">
+        <h3>AI Trust Explanation</h3>
+        <p id="aiExplanation"></p>
+      </div>
+
+    </section>
+  </main>
+
+  <script src="/static/js/main.js"></script>
+</body>
+</html>
