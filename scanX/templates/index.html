@@ -98,6 +98,36 @@
     </button>
   </div>
 </div>
+<!-- Trust Dimension Modal -->
+<div id="dimensionModal" class="modal hidden">
+  <div class="modal-overlay" onclick="closeDimensionModal()"></div>
+
+  <div class="modal-card">
+    <div class="modal-header">
+      <div>
+        <h3 id="dimensionModalTitle">Trust Dimension</h3>
+        <span id="dimensionStatus" class="status-badge">Moderate</span>
+      </div>
+      <button class="modal-close" onclick="closeDimensionModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <p id="dimensionModalBody">
+        Explanation will appear here.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <span class="modal-hint">
+        Based on OSINT, infrastructure, policy, and user experience signals
+      </span>
+      <button class="primary-btn" onclick="closeDimensionModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+
 
 
 

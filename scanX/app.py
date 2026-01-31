@@ -2,11 +2,13 @@
 
 from flask import Flask, render_template
 from api.analyze import analyze_api
+from core.explain_dimension import dimension_api
 
 app = Flask(__name__)
 
+# ✅ expose BOTH under /api
 app.register_blueprint(analyze_api, url_prefix="/api")
-
+app.register_blueprint(dimension_api, url_prefix="/api")
 
 @app.route("/")
 def index():

@@ -1,0 +1,3 @@
+python-whois
+requests
+beautifulsoup4

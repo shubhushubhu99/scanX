@@ -41,6 +41,7 @@ def explain_trust(
     live_inspection: dict,
     risk_result: dict
 ) -> dict:
+    print("[AI] explain_trust() CALLED")
     """
     Produce a deep, dynamic explanation based on real signals.
     """

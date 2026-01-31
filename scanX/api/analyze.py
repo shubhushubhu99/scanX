@@ -9,6 +9,10 @@ from core.policy_analyzer import analyze_policies
 from core.policy_mismatch import detect_policy_mismatch
 from core.trust_dimensions import evaluate_trust_dimensions
 from agents.deep_explainer import explain_trust
+from core.infra_intel import inspect_infrastructure
+from core.security_posture import analyze_security_posture
+from core.content_fingerprint import fingerprint_content
+
 
 analyze_api = Blueprint("analyze_api", __name__)
 
@@ -74,14 +78,33 @@ def analyze():
                 "ai_error": str(ai_error)
             }
 
+                # 9 Domain age checker
+        infra = inspect_infrastructure(domain)
+
+        # 10 ANALYZE SECURITY POSTURE
+        security = analyze_security_posture(domain)
+
+        # 10 CONTENT FINGERPRINTING
+        content_meta = fingerprint_content(domain)
+
         # 8️⃣ Trust Dimension Engine
         trust_dimensions = evaluate_trust_dimensions(
             osint=osint,
             experience=experience,
             live=live,
             policy_quality=policy_quality,
-            policy_mismatches=policy_mismatches
+            policy_mismatches=policy_mismatches,
+            infra=infra,
+            security=security,
+            content=content_meta
         )
+
+
+
+
+
+
+
 
         return jsonify({
             "domain": domain,
@@ -97,7 +120,13 @@ def analyze():
             "policy_quality": policy_quality,
             "policy_mismatches": policy_mismatches,
             "risk": risk,
-            "trust_dimensions": trust_dimensions
+            "trust_dimensions": trust_dimensions,
+            "infra": infra,
+            "security_posture": security,
+            "content_fingerprint": content_meta
+
+
+
         })
 
     except Exception as e:

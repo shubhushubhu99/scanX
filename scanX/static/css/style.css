@@ -223,11 +223,11 @@ li {
   color: #cbd5f5;
 }
 
-/* ===== MODAL ===== */
+/* === MODAL BASE === */
 .modal {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 999;
 }
 
 .modal.hidden {
@@ -237,17 +237,113 @@ li {
 .modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(5, 10, 25, 0.75);
+  backdrop-filter: blur(4px);
 }
 
-.modal-content {
+/* === MODAL CARD === */
+.modal-card {
   position: relative;
-  z-index: 10000;
-  max-width: 420px;
-  margin: 15vh auto;
-  background: #0f172a;
-  padding: 20px;
-  border-radius: 12px;
+  max-width: 520px;
+  margin: 10vh auto;
+  background: linear-gradient(180deg, #0b1222, #080d1a);
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: popIn 0.25s ease-out;
+  color: #e5e7eb;
+}
+
+/* === HEADER === */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+/* === STATUS BADGE === */
+.status-badge {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  background: #334155;
+  color: #e5e7eb;
+}
+
+.status-badge.strong { background: #064e3b; color: #6ee7b7; }
+.status-badge.moderate { background: #3b2f00; color: #fde68a; }
+.status-badge.weak { background: #3f1d1d; color: #fca5a5; }
+.status-badge.concerning,
+.status-badge.elevated { background: #450a0a; color: #f87171; }
+
+/* === CLOSE BUTTON === */
+.modal-close {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+/* === BODY === */
+.modal-body {
+  padding: 20px 22px;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  color: #d1d5db;
+}
+
+/* === FOOTER === */
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 22px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.modal-hint {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.primary-btn {
+  background: #2563eb;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.primary-btn:hover {
+  background: #1d4ed8;
+}
+
+/* === ANIMATION === */
+@keyframes popIn {
+  from {
+    transform: translateY(20px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
 }
 
 .close-btn {
@@ -258,4 +354,15 @@ li {
   cursor: pointer;
   background: #2563eb;
   color: white;
+}
+
+.trust-row {
+  cursor: pointer;
+  pointer-events: auto;
+  position: relative;
+  z-index: 5;
+}
+
+.trust-row * {
+  pointer-events: none;
 }

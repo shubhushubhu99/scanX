@@ -35,6 +35,7 @@ function render(data) {
   // SAFETY CHECK
   if (!data) return;
 globalOsint = data.osint;
+window.currentTrustDimensions = data.trust_dimensions;
 
   /* =======================
      SHOW DASHBOARD
@@ -179,17 +180,18 @@ if (data.experience) {
       const statusClass =
         "status-" + value.status.toLowerCase().replace(/\s+/g, "-");
 
-      trustBox.innerHTML += `
-        <div class="trust-row">
-          <div class="trust-name">${key.replace(/_/g, " ")}</div>
-          <div class="trust-status ${statusClass}">
-            ${value.status}
-          </div>
-          <div class="trust-reason">
-            ${value.reason}
-          </div>
-        </div>
-      `;
+  trustBox.innerHTML += `
+    <div class="trust-row clickable"
+       data-dimension="${key}"
+       data-status="${value.status}"
+       onclick="handleDimensionClick(this)">
+    <div class="trust-name">${key.replace(/_/g, " ")}</div>
+    <div class="trust-status ${statusClass}">${value.status}</div>
+    <div class="trust-reason">${value.reason}</div>
+  </div>
+`;
+
+
     });
 
     trustPanel.classList.remove("hidden");
@@ -290,3 +292,48 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.add("hidden");
   });
 });
+
+function explainTrustDimension(dimension, status, signals) {
+  fetch("/api/explain-dimension", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      dimension,
+      status,
+      signals
+    })
+  })
+    .then(res => res.json())
+.then(data => {
+  document.getElementById("dimensionModalTitle").innerText =
+    dimension.replace(/_/g, " ");
+
+  document.getElementById("dimensionModalBody").innerText =
+    data.explanation;
+
+  const badge = document.getElementById("dimensionStatus");
+  badge.innerText = status;
+  badge.className = "status-badge " + status.toLowerCase();
+
+  document.getElementById("dimensionModal")
+    .classList.remove("hidden");
+});
+
+}
+
+
+function closeDimensionModal() {
+  document.getElementById("dimensionModal").classList.add("hidden");
+}
+
+function handleDimensionClick(el) {
+  const dimension = el.dataset.dimension;
+  const status = el.dataset.status;
+
+  // Find matching trust dimension data
+  const signals = window.currentTrustDimensions
+    ? window.currentTrustDimensions[dimension]
+    : {};
+
+  explainTrustDimension(dimension, status, signals);
+}
