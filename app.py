@@ -1,52 +1,18 @@
-from flask import Flask, render_template, request
-from api.analyze import analyze_target
+# app.py
+
+from flask import Flask, render_template
+from api.analyze import analyze_api
+from core.explain_dimension import dimension_api
 
 app = Flask(__name__)
 
+# ✅ expose BOTH under /api
+app.register_blueprint(analyze_api, url_prefix="/api")
+app.register_blueprint(dimension_api, url_prefix="/api")
 
-@app.route("/", methods=["GET"])
+@app.route("/")
 def index():
     return render_template("index.html")
-
-
-@app.route("/analyze", methods=["POST"])
-def analyze():
-    target = request.form.get("target")
-
-    if not target:
-        return render_template(
-            "error.html",
-            error="No target provided"
-        )
-
-    result = analyze_target(target)
-
-    if not result.get("success"):
-        return render_template(
-            "error.html",
-            error=result.get("error", "Unknown error")
-        )
-
-    return render_template(
-        "result.html",
-        result=result
-    )
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template(
-        "error.html",
-        error="Page not found"
-    ), 404
-
-
-@app.errorhandler(500)
-def internal_error(e):
-    return render_template(
-        "error.html",
-        error="Internal server error"
-    ), 500
 
 
 if __name__ == "__main__":
