@@ -1,3 +1,6 @@
 python-whois
 requests
 beautifulsoup4
+flask
+dotenv
+google-genai
