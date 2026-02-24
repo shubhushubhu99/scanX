@@ -1,6 +1,16 @@
 let globalOsint = null;
 
-function startScan() {
+const scanState = {
+  isScanning: false,
+  currentMode: null,
+  logs: [],
+  logIntervalId: null,
+  progressIntervalId: null,
+  progress: 0,
+  startedAt: null,
+};
+
+function startScan(mode = "deep") {
   const url = document.getElementById("urlInput").value.trim();
   const category = document.getElementById("categoryInput").value;
 
@@ -9,39 +19,62 @@ function startScan() {
     return;
   }
 
+  if (scanState.isScanning) {
+    // Prevent double clicks across Analyse / Deep Scan
+    return;
+  }
+
+  scanState.isScanning = true;
+  scanState.currentMode = mode;
+  scanState.startedAt = Date.now();
+  scanState.progress = 0;
+
+  beginScanUI(mode);
+
   fetch("/api/analyze", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url, category })
+    body: JSON.stringify({ url, category, mode })
   })
     .then(res => res.json())
     .then(data => {
       console.log("API RESPONSE:", data);
 
       if (data.error) {
+        appendLog(
+          `Scan failed: ${data.details || "Unknown error"}`,
+          "error"
+        );
         alert("Scan failed: " + (data.details || "Unknown error"));
+        completeScanUI(false);
         return;
       }
 
       render(data);
+      completeScanUI(true, data);
     })
     .catch(err => {
       console.error(err);
+      appendLog("Network error while calling /api/analyze", "error");
       alert("Network error");
+      completeScanUI(false);
     });
 }
 
 function render(data) {
   // SAFETY CHECK
   if (!data) return;
-globalOsint = data.osint;
-window.currentTrustDimensions = data.trust_dimensions;
+  globalOsint = data.osint;
+  window.currentTrustDimensions = data.trust_dimensions;
 
   /* =======================
      SHOW DASHBOARD
   ======================= */
   const dashboard = document.getElementById("dashboard");
   if (dashboard) dashboard.classList.remove("hidden");
+
+  const scanMeta = document.getElementById("scanMeta");
+  if (scanMeta) scanMeta.classList.remove("hidden");
 
   /* =======================
      VERDICT
@@ -77,10 +110,12 @@ window.currentTrustDimensions = data.trust_dimensions;
 ======================= */
 const concernsEl = document.getElementById("concerns");
 concernsEl.innerHTML = "";
+let concernCount = 0;
 
 if (data.experience) {
   Object.entries(data.experience).forEach(([key, value]) => {
     if (value.count >= 3) {
+      concernCount += 1;
       concernsEl.innerHTML += `
         <li>
           <strong>${key.replace(/_/g, " ")}</strong>
@@ -97,6 +132,43 @@ if (data.experience) {
 }
 
 
+  /* =======================
+     META STATS
+  ======================= */
+  const statTotalItems = document.getElementById("statTotalItems");
+  const statDetections = document.getElementById("statDetections");
+  const statDuration = document.getElementById("statDuration");
+
+  let totalSignals = 0;
+
+  if (data.experience) {
+    totalSignals += Object.values(data.experience).reduce(
+      (sum, v) => sum + (v.count || 0),
+      0
+    );
+  }
+
+  if (data.live?.signals) {
+    totalSignals += Object.keys(data.live.signals).length;
+  }
+
+  if (data.osint?.platforms_with_mentions) {
+    totalSignals += data.osint.platforms_with_mentions.length;
+  }
+
+  if (statTotalItems) {
+    statTotalItems.innerText = totalSignals.toString();
+  }
+  if (statDetections) {
+    statDetections.innerText = concernCount.toString();
+  }
+  if (statDuration) {
+    const elapsedMs = scanState.startedAt
+      ? Date.now() - scanState.startedAt
+      : 0;
+    const seconds = Math.max(0.5, elapsedMs / 1000);
+    statDuration.innerText = `${seconds.toFixed(1)}s`;
+  }
 
   /* =======================
      EXPERIENCE BADGES
@@ -293,6 +365,264 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
+/* =======================
+   LOGGING & PROGRESS
+======================= */
+
+function appendLog(message, level = "info") {
+  const logList = document.getElementById("logList");
+  if (!logList) return;
+
+  const now = new Date();
+  const timestamp = now.toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+
+  const entry = {
+    id: `${now.getTime()}-${Math.random().toString(16).slice(2)}`,
+    timestamp,
+    level,
+    message,
+  };
+
+  scanState.logs.push(entry);
+
+  const row = document.createElement("div");
+  row.className = `log-entry ${level}`;
+
+  const iconMap = {
+    info: "⧉",
+    success: "✔",
+    warning: "⚠",
+    error: "⨯",
+  };
+
+  const statusLabelMap = {
+    info: "Info",
+    success: "Success",
+    warning: "Warning",
+    error: "Error",
+  };
+
+  row.innerHTML = `
+    <div class="log-meta">
+      <span class="log-time">${entry.timestamp}</span>
+      <span class="log-status">${statusLabelMap[level] || "Info"}</span>
+    </div>
+    <div class="log-message">
+      <span class="log-icon">${iconMap[level] || "⧉"}</span>
+      ${entry.message}
+    </div>
+  `;
+
+  logList.appendChild(row);
+
+  const container = document.querySelector(".log-body");
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+function toggleLiveLog(enabled) {
+  const panel = document.getElementById("logPanel");
+  if (!panel) return;
+
+  if (enabled) {
+    panel.classList.remove("collapsed");
+  } else {
+    panel.classList.add("collapsed");
+  }
+}
+
+function downloadLogs() {
+  if (!scanState.logs.length) {
+    alert("No logs available yet.");
+    return;
+  }
+
+  const lines = scanState.logs.map(
+    (l) => `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message}`
+  );
+
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `scanx-logs-${new Date()
+    .toISOString()
+    .replace(/[:.]/g, "-")}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function beginScanUI(mode) {
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const deepBtn = document.getElementById("deepScanBtn");
+  const progressFill = document.getElementById("progressFill");
+  const progressPercent = document.getElementById("progressPercent");
+
+  if (analyzeBtn) {
+    analyzeBtn.disabled = true;
+    analyzeBtn.classList.remove("is-success");
+  }
+  if (deepBtn) {
+    deepBtn.disabled = true;
+    deepBtn.classList.remove("is-success");
+  }
+
+  const targetBtn = mode === "analyze" ? analyzeBtn : deepBtn;
+  if (targetBtn) {
+    if (!targetBtn.dataset.originalLabel) {
+      targetBtn.dataset.originalLabel = targetBtn.innerText.trim();
+    }
+
+    const loadingLabel =
+      mode === "analyze" ? "Analyzing…" : "Deep scanning…";
+
+    targetBtn.classList.add("is-loading");
+    targetBtn.innerHTML = `
+      <span class="btn-spinner"></span>
+      <span>${loadingLabel}</span>
+    `;
+  }
+
+  if (progressFill) {
+    progressFill.style.width = "0%";
+    progressFill.classList.add("is-animating");
+  }
+  if (progressPercent) {
+    progressPercent.innerText = "0%";
+  }
+
+  // Reset and optionally open logs
+  scanState.logs = [];
+  const logList = document.getElementById("logList");
+  if (logList) logList.innerHTML = "";
+
+  const logToggle = document.getElementById("logToggle");
+  if (logToggle && logToggle.checked) {
+    toggleLiveLog(true);
+  }
+
+  // Simulated live logs while request is in flight
+  const steps =
+    mode === "analyze"
+      ? [
+          "Initializing lightweight trust checks",
+          "Collecting surface OSINT signals",
+          "Evaluating basic risk posture",
+          "Summarizing high-level verdict",
+        ]
+      : [
+          "Bootstrapping deep scan pipeline",
+          "Enumerating OSINT and infra sources",
+          "Inspecting content, policy and UX signals",
+          "Running risk engine across trust dimensions",
+          "Aggregating AI explanation and references",
+        ];
+
+  let stepIndex = 0;
+  scanState.logIntervalId = window.setInterval(() => {
+    if (!scanState.isScanning || stepIndex >= steps.length) {
+      window.clearInterval(scanState.logIntervalId);
+      scanState.logIntervalId = null;
+      return;
+    }
+    appendLog(steps[stepIndex], "info");
+    stepIndex += 1;
+  }, 900);
+
+  // Progress animation up to ~80% until we complete
+  scanState.progress = 0;
+  scanState.progressIntervalId = window.setInterval(() => {
+    if (!scanState.isScanning) {
+      window.clearInterval(scanState.progressIntervalId);
+      scanState.progressIntervalId = null;
+      return;
+    }
+    const maxWhileRunning = 80;
+    const increment = Math.random() * 6 + 4; // 4–10%
+    scanState.progress = Math.min(
+      maxWhileRunning,
+      scanState.progress + increment
+    );
+
+    if (progressFill) {
+      progressFill.style.width = `${scanState.progress}%`;
+    }
+    if (progressPercent) {
+      progressPercent.innerText = `${Math.round(
+        scanState.progress
+      )}%`;
+    }
+  }, 700);
+}
+
+function completeScanUI(success, data) {
+  scanState.isScanning = false;
+
+  if (scanState.logIntervalId) {
+    window.clearInterval(scanState.logIntervalId);
+    scanState.logIntervalId = null;
+  }
+  if (scanState.progressIntervalId) {
+    window.clearInterval(scanState.progressIntervalId);
+    scanState.progressIntervalId = null;
+  }
+
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const deepBtn = document.getElementById("deepScanBtn");
+  const progressFill = document.getElementById("progressFill");
+  const progressPercent = document.getElementById("progressPercent");
+
+  const allBtns = [analyzeBtn, deepBtn].filter(Boolean);
+  allBtns.forEach((btn) => {
+    btn.disabled = false;
+    btn.classList.remove("is-loading");
+  });
+
+  if (progressFill) {
+    progressFill.classList.remove("is-animating");
+    progressFill.style.width = success ? "100%" : `${Math.max(
+      scanState.progress,
+      15
+    )}%`;
+  }
+  if (progressPercent) {
+    progressPercent.innerText = success ? "100%" : `${Math.round(
+      scanState.progress
+    )}%`;
+  }
+
+  if (success) {
+    const mode = scanState.currentMode || "deep";
+    const targetBtn = mode === "analyze" ? analyzeBtn : deepBtn;
+
+    if (targetBtn) {
+      const original = targetBtn.dataset.originalLabel || "Scan";
+      targetBtn.classList.add("is-success");
+      targetBtn.innerHTML = `
+        <span class="btn-checkmark">✓</span>
+        <span>${original}</span>
+      `;
+
+      window.setTimeout(() => {
+        targetBtn.classList.remove("is-success");
+        targetBtn.innerText = original;
+      }, 900);
+    }
+
+    appendLog("Scan completed successfully.", "success");
+  } else {
+    appendLog("Scan ended with an error.", "error");
+  }
+}
+
 function explainTrustDimension(dimension, status, signals) {
   fetch("/api/explain-dimension", {
     method: "POST",
@@ -336,4 +666,8 @@ function handleDimensionClick(el) {
     : {};
 
   explainTrustDimension(dimension, status, signals);
+}
+
+function closeDimensionModal() {
+  document.getElementById("dimensionModal").classList.add("hidden");
 }

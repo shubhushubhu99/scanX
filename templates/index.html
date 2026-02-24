@@ -13,28 +13,102 @@
       <span class="logo">scanX</span>
       <span class="subtitle">Trust Intelligence Platform</span>
     </div>
+
+    <div class="top-meta">
+      <div class="meta-pill">
+        <span class="dot live"></span>
+        Real-time OSINT & risk engine
+      </div>
+    </div>
   </header>
 
   <!-- INPUT SECTION -->
   <section class="input-section">
-    <div class="input-card">
-      <input id="urlInput" placeholder="example.com" />
-      <select id="categoryInput">
-        <option>Online Shopping</option>
-        <option>Online Job</option>
-        <option>Online Service</option>
-        <option>Freelancing</option>
-        <option>College Admission</option>
-      </select>
-      <button onclick="startScan()">Run Deep Scan</button>
+    <div class="input-card glass">
+      <div class="input-header">
+        <h2>Scan a domain</h2>
+        <p>Run a trust and risk deep-dive before you engage.</p>
+      </div>
+
+      <div class="input-grid">
+        <input id="urlInput" placeholder="example.com" />
+        <select id="categoryInput">
+          <option>Online Shopping</option>
+          <option>Online Job</option>
+          <option>Online Service</option>
+          <option>Freelancing</option>
+          <option>College Admission</option>
+        </select>
+
+        <div class="input-actions">
+          <button
+            id="analyzeBtn"
+            class="action-btn primary"
+            type="button"
+            onclick="startScan('analyze')"
+          >
+            Analyse
+          </button>
+          <button
+            id="deepScanBtn"
+            class="action-btn secondary"
+            type="button"
+            onclick="startScan('deep')"
+          >
+            Deep Scan
+          </button>
+        </div>
+      </div>
+
+      <div class="input-footer">
+        <label class="toggle-row">
+          <input
+            id="logToggle"
+            type="checkbox"
+            onchange="toggleLiveLog(this.checked)"
+          />
+          <span class="toggle-visual">
+            <span class="toggle-thumb"></span>
+          </span>
+          <span class="toggle-label">Show live processing log</span>
+        </label>
+      </div>
     </div>
   </section>
 
   <!-- DASHBOARD -->
   <main id="dashboard" class="dashboard hidden">
 
+    <!-- PROGRESS + SUMMARY STRIP -->
+    <section id="scanMeta" class="scan-meta hidden">
+      <div class="scan-stats">
+        <div class="stat">
+          <span class="stat-label">Total signals scanned</span>
+          <span id="statTotalItems" class="stat-value">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Detections</span>
+          <span id="statDetections" class="stat-value detections">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Scan duration</span>
+          <span id="statDuration" class="stat-value">0s</span>
+        </div>
+      </div>
+
+      <div class="scan-progress">
+        <div class="progress-label">
+          <span>Scan progress</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- VERDICT -->
-    <section id="verdict" class="verdict">
+    <section id="verdict" class="verdict glass">
       <h1 id="riskLevel"></h1>
       <p id="riskReason"></p>
     </section>
@@ -82,6 +156,27 @@
         <h3>AI Trust Explanation</h3>
         <p id="aiExplanation"></p>
       </div>
+
+      <!-- LIVE LOG PANEL -->
+      <section id="logPanel" class="log-panel collapsed">
+        <header class="log-header">
+          <div class="log-title">
+            <span class="log-dot"></span>
+            <span>Live Processing Log</span>
+          </div>
+          <button
+            id="downloadLogsBtn"
+            type="button"
+            class="ghost-btn"
+            onclick="downloadLogs()"
+          >
+            Download logs
+          </button>
+        </header>
+        <div class="log-body">
+          <div id="logList" class="log-list"></div>
+        </div>
+      </section>
 <!-- REFERENCES MODAL -->
 <div id="referenceModal" class="modal hidden">
   <div class="modal-overlay"></div>
