@@ -1,2 +1,62 @@
+# ── Secrets / environment ──
 .env
+.env.*
+*.env
+!.env.example
+
+# ── Python bytecode / build artifacts ──
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+*.egg
+
+# ── Virtual environments ──
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# ── Testing / coverage ──
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+nosetests.xml
+coverage.xml
+
+# ── Logs ──
+*.log
+logs/
+
+# ── IDE / editor ──
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS files ──
+.DS_Store
+Thumbs.db
+
+# ── Jupyter ──
+.ipynb_checkpoints/
+
+# ── Type checkers / linters cache ──
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+
+# ── Personal/test scripts ──
 test_gemini.py
