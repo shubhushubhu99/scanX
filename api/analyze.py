@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from urllib.parse import urlparse
 
+from utils.validators import validate_domain
 from core.reputation import collect_public_signals
 from core.live_inspector import inspect_site
 from core.experience_miner import mine_experiences
@@ -33,6 +34,10 @@ def analyze():
         return jsonify({"error": "Invalid domain"}), 400
 
     domain = normalize_domain(raw_domain)
+    domain = validate_domain(domain)
+
+    if not domain:
+        return jsonify({"error": "Invalid or disallowed domain"}), 400
 
     try:
         # 1️⃣ OSINT collection
