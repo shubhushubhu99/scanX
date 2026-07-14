@@ -471,6 +471,17 @@ button {
   color: var(--muted);
 }
 
+/* NEW SCAN / RESET BUTTON */
+#newScanBtn {
+  border-color: rgba(148, 163, 184, 0.5);
+  color: var(--text);
+}
+
+#newScanBtn:hover:not(:disabled) {
+  border-color: rgba(148, 163, 184, 0.8);
+  background: rgba(148, 163, 184, 0.08);
+}
+
 /* VERDICT RISK LEVEL COLOR CODING */
 .verdict.risk-low {
   background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.3), rgba(15, 23, 42, 0.95));

@@ -25,7 +25,7 @@ def google_search(query: str, num_results: int = 5) -> list:
         "num": num_results,
     }
 
-    resp = requests.get(BASE_URL, params=params, timeout=15)
+    resp = requests.get(BASE_URL, params=params, timeout=30)
     resp.raise_for_status()
     data = resp.json()
 

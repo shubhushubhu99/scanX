@@ -310,6 +310,101 @@ function render(data) {
 }
 
 /* =======================
+   NEW SCAN / RESET
+======================= */
+function resetScan() {
+  // Don't reset mid-scan
+  if (scanState.isScanning) {
+    return;
+  }
+
+  // Hide dashboard + scan meta
+  const dashboard = document.getElementById("dashboard");
+  if (dashboard) dashboard.classList.add("hidden");
+
+  const scanMeta = document.getElementById("scanMeta");
+  if (scanMeta) scanMeta.classList.add("hidden");
+
+  // Clear verdict
+  const verdictEl = document.getElementById("riskLevel");
+  const reasonEl = document.getElementById("riskReason");
+  if (verdictEl) verdictEl.innerText = "";
+  if (reasonEl) reasonEl.innerText = "";
+
+  const verdictCard = verdictEl ? verdictEl.closest(".verdict") : null;
+  if (verdictCard) {
+    verdictCard.classList.remove("risk-low", "risk-moderate", "risk-high");
+  }
+
+  // Clear lists and badges
+  ["strengths", "concerns", "opsSignals", "sources", "experienceBadges", "policyMismatches", "trustDimensions"]
+    .forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = "";
+    });
+
+  // Hide conditional panels
+  document.getElementById("policyMismatchPanel")?.classList.add("hidden");
+  document.getElementById("trustDimensionsPanel")?.classList.add("hidden");
+
+  // Reset stats
+  const statTotalItems = document.getElementById("statTotalItems");
+  const statDetections = document.getElementById("statDetections");
+  const statDuration = document.getElementById("statDuration");
+  if (statTotalItems) statTotalItems.innerText = "0";
+  if (statDetections) statDetections.innerText = "0";
+  if (statDuration) statDuration.innerText = "0.0s";
+
+  // Reset progress bar
+  const progressFill = document.getElementById("progressFill");
+  const progressPercent = document.getElementById("progressPercent");
+  if (progressFill) {
+    progressFill.style.width = "0%";
+    progressFill.classList.remove("is-animating");
+  }
+  if (progressPercent) progressPercent.innerText = "0%";
+
+  // Clear AI explanation
+  const aiExplanation = document.getElementById("aiExplanation");
+  if (aiExplanation) aiExplanation.innerText = "";
+
+  // Clear logs
+  scanState.logs = [];
+  const logList = document.getElementById("logList");
+  if (logList) logList.innerHTML = "";
+  document.getElementById("logPanel")?.classList.add("collapsed");
+
+  // Reset buttons in case any leftover state
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const deepBtn = document.getElementById("deepScanBtn");
+  [analyzeBtn, deepBtn].filter(Boolean).forEach((btn) => {
+    btn.disabled = false;
+    btn.classList.remove("is-loading", "is-success");
+    if (btn.dataset.originalLabel) {
+      btn.innerText = btn.dataset.originalLabel;
+    }
+  });
+
+  // Clear + refocus URL input
+  const urlInput = document.getElementById("urlInput");
+  if (urlInput) {
+    urlInput.value = "";
+    urlInput.focus();
+  }
+
+  // Scroll back to the input section
+  const inputSection = document.querySelector(".input-section") || document.getElementById("urlInput");
+  if (inputSection) {
+    inputSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  globalOsint = null;
+  window.currentTrustDimensions = null;
+
+  appendLog("Ready for a new scan.", "info");
+}
+
+/* =======================
    HELPER
 ======================= */
 function fillList(id, items) {
@@ -528,6 +623,9 @@ function beginScanUI(mode) {
     progressPercent.innerText = "0%";
   }
 
+  const newScanBtn = document.getElementById("newScanBtn");
+  if (newScanBtn) newScanBtn.classList.add("hidden");
+
   // Reset and optionally open logs
   scanState.logs = [];
   const logList = document.getElementById("logList");
@@ -650,6 +748,9 @@ function completeScanUI(success, data) {
   } else {
     appendLog("Scan ended with an error.", "error");
   }
+
+  const newScanBtn = document.getElementById("newScanBtn");
+  if (newScanBtn) newScanBtn.classList.remove("hidden");
 }
 
 function explainTrustDimension(dimension, status, signals) {
