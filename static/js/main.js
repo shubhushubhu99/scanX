@@ -50,13 +50,39 @@ function startScan(mode = "deep") {
         return;
       }
 
-      render(data);
-      completeScanUI(true, data);
+      if (data.task_id) {
+        pollTaskStatus(data.task_id);
+      } else {
+        render(data);
+        completeScanUI(true, data);
+      }
     })
     .catch(err => {
       console.error(err);
       appendLog("Network error while calling /api/analyze", "error");
       alert("Network error");
+      completeScanUI(false);
+    });
+}
+
+function pollTaskStatus(taskId) {
+  fetch(`/api/analyze/status/${taskId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.state === 'PENDING' || data.state === 'STARTED' || data.status === 'processing') {
+        setTimeout(() => pollTaskStatus(taskId), 2000);
+      } else if (data.result && data.state !== 'FAILURE') {
+        render(data.result);
+        completeScanUI(true, data.result);
+      } else {
+        appendLog(`Scan failed: ${data.status || data.state}`, "error");
+        alert("Scan failed: " + (data.status || data.state));
+        completeScanUI(false);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      appendLog("Network error while polling status", "error");
       completeScanUI(false);
     });
 }
