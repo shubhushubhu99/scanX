@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>scanX — Trust Intelligence</title>
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
+
 <body>
 
   <!-- TOP BAR -->
@@ -41,20 +43,10 @@
         </select>
 
         <div class="input-actions">
-          <button
-            id="analyzeBtn"
-            class="action-btn primary"
-            type="button"
-            onclick="startScan('analyze')"
-          >
+          <button id="analyzeBtn" class="action-btn primary" type="button" onclick="startScan('analyze')">
             Analyse
           </button>
-          <button
-            id="deepScanBtn"
-            class="action-btn secondary"
-            type="button"
-            onclick="startScan('deep')"
-          >
+          <button id="deepScanBtn" class="action-btn secondary" type="button" onclick="startScan('deep')">
             Deep Scan
           </button>
         </div>
@@ -62,16 +54,44 @@
 
       <div class="input-footer">
         <label class="toggle-row">
-          <input
-            id="logToggle"
-            type="checkbox"
-            onchange="toggleLiveLog(this.checked)"
-          />
+          <input id="logToggle" type="checkbox" onchange="toggleLiveLog(this.checked)" />
           <span class="toggle-visual">
             <span class="toggle-thumb"></span>
           </span>
           <span class="toggle-label">Show live processing log</span>
         </label>
+      </div>
+    </div>
+  </section>
+  <section class="features-section">
+    <div class="section-title">
+      <h2>Why use scanX?</h2>
+      <p>A lightweight, modular scanning engine designed for instant website reconnaissance.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon-wrapper">🌐</div>
+        <h3>Domain Intelligence</h3>
+        <p>Perform deep WHOIS lookups and analyze domain registration historical data instantly.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrapper">🔒</div>
+        <h3>SSL/HTTPS Configuration</h3>
+        <p>Verify SSL certificates, connection security standards, and handshake setups.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrapper">🛡️</div>
+        <h3>Security Headers</h3>
+        <p>Check for essential HTTP headers (HSTS, CSP, X-Frame-Options) to protect configurations.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon-wrapper">🤖</div>
+        <h3>AI Trust Insights</h3>
+        <p>Integrated with Google's Gemini models to give clear, automated explanation logs.</p>
       </div>
     </div>
   </section>
@@ -114,10 +134,10 @@
     </section>
 
     <!-- TRUST DIMENSIONS -->
-<section id="trustDimensionsPanel" class="card wide hidden">
-  <h3>Trust Dimension Analysis</h3>
-  <div id="trustDimensions"></div>
-</section>
+    <section id="trustDimensionsPanel" class="card wide hidden">
+      <h3>Trust Dimension Analysis</h3>
+      <div id="trustDimensions"></div>
+    </section>
 
 
     <!-- GRID -->
@@ -147,11 +167,11 @@
         <h3>Public Intelligence Sources</h3>
         <ul id="sources"></ul>
       </div>
-<!-- POLICY MISMATCH -->
-<section id="policyMismatchPanel" class="card wide hidden">
-  <h3>Policy Enforcement Gaps</h3>
-  <ul id="policyMismatches"></ul>
-</section>
+      <!-- POLICY MISMATCH -->
+      <section id="policyMismatchPanel" class="card wide hidden">
+        <h3>Policy Enforcement Gaps</h3>
+        <ul id="policyMismatches"></ul>
+      </section>
       <div class="card wide highlight fade delay5">
         <h3>AI Trust Explanation</h3>
         <p id="aiExplanation"></p>
@@ -164,12 +184,7 @@
             <span class="log-dot"></span>
             <span>Live Processing Log</span>
           </div>
-          <button
-            id="downloadLogsBtn"
-            type="button"
-            class="ghost-btn"
-            onclick="downloadLogs()"
-          >
+          <button id="downloadLogsBtn" type="button" class="ghost-btn" onclick="downloadLogs()">
             Download logs
           </button>
         </header>
@@ -177,49 +192,46 @@
           <div id="logList" class="log-list"></div>
         </div>
       </section>
-<!-- REFERENCES MODAL -->
-<div id="referenceModal" class="modal hidden">
-  <div class="modal-overlay"></div>
+      <!-- REFERENCES MODAL -->
+      <div id="referenceModal" class="modal hidden">
+        <div class="modal-overlay"></div>
 
-  <div class="modal-content">
-    <h3 id="modalTitle">References</h3>
-    <ul id="modalLinks"></ul>
+        <div class="modal-content">
+          <h3 id="modalTitle">References</h3>
+          <ul id="modalLinks"></ul>
 
-    <button
-      id="closeModalBtn"
-      type="button"
-      class="close-btn">
-      Close
-    </button>
-  </div>
-</div>
-<!-- Trust Dimension Modal -->
-<div id="dimensionModal" class="modal hidden">
-  <div class="modal-overlay" onclick="closeDimensionModal()"></div>
-
-  <div class="modal-card">
-    <div class="modal-header">
-      <div>
-        <h3 id="dimensionModalTitle">Trust Dimension</h3>
-        <span id="dimensionStatus" class="status-badge">Moderate</span>
+          <button id="closeModalBtn" type="button" class="close-btn">
+            Close
+          </button>
+        </div>
       </div>
-      <button class="modal-close" onclick="closeDimensionModal()">✕</button>
-    </div>
+      <!-- Trust Dimension Modal -->
+      <div id="dimensionModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeDimensionModal()"></div>
 
-    <div class="modal-body">
-      <p id="dimensionModalBody">
-        Explanation will appear here.
-      </p>
-    </div>
+        <div class="modal-card">
+          <div class="modal-header">
+            <div>
+              <h3 id="dimensionModalTitle">Trust Dimension</h3>
+              <span id="dimensionStatus" class="status-badge">Moderate</span>
+            </div>
+            <button class="modal-close" onclick="closeDimensionModal()">✕</button>
+          </div>
 
-    <div class="modal-footer">
-      <span class="modal-hint">
-        Based on OSINT, infrastructure, policy, and user experience signals
-      </span>
-      <button class="primary-btn" onclick="closeDimensionModal()">Close</button>
-    </div>
-  </div>
-</div>
+          <div class="modal-body">
+            <p id="dimensionModalBody">
+              Explanation will appear here.
+            </p>
+          </div>
+
+          <div class="modal-footer">
+            <span class="modal-hint">
+              Based on OSINT, infrastructure, policy, and user experience signals
+            </span>
+            <button class="primary-btn" onclick="closeDimensionModal()">Close</button>
+          </div>
+        </div>
+      </div>
 
 
 
@@ -231,4 +243,5 @@
 
   <script src="/static/js/main.js"></script>
 </body>
+
 </html>
