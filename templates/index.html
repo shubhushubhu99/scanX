@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>scanX — Trust Intelligence</title>
   <link rel="stylesheet" href="/static/css/style.css" />
 </head>
+
 <body>
 
   <!-- TOP BAR -->
   <header class="topbar">
     <div class="brand">
-      <span class="logo">scanX</span>
+      <img src="/static/images/scanx-logo.png" alt="scanX logo" class="brand-logo" />
       <span class="subtitle">Trust Intelligence Platform</span>
     </div>
 
@@ -41,32 +43,21 @@
         </select>
 
         <div class="input-actions">
-          <button
-            id="analyzeBtn"
-            class="action-btn primary"
-            type="button"
-            onclick="startScan('analyze')"
-          >
+          <button id="analyzeBtn" class="action-btn primary" type="button" onclick="startScan('analyze')">
             Analyse
           </button>
-          <button
-            id="deepScanBtn"
-            class="action-btn secondary"
-            type="button"
-            onclick="startScan('deep')"
-          >
+          <button id="deepScanBtn" class="action-btn secondary" type="button" onclick="startScan('deep')">
             Deep Scan
+          </button>
+          <button id="newScanBtn" class="ghost-btn hidden" type="button" onclick="resetScan()">
+            ↺ New Scan
           </button>
         </div>
       </div>
 
       <div class="input-footer">
         <label class="toggle-row">
-          <input
-            id="logToggle"
-            type="checkbox"
-            onchange="toggleLiveLog(this.checked)"
-          />
+          <input id="logToggle" type="checkbox" onchange="toggleLiveLog(this.checked)" />
           <span class="toggle-visual">
             <span class="toggle-thumb"></span>
           </span>
@@ -75,7 +66,6 @@
       </div>
     </div>
   </section>
-
   <!-- DASHBOARD -->
   <main id="dashboard" class="dashboard hidden">
 
@@ -114,10 +104,10 @@
     </section>
 
     <!-- TRUST DIMENSIONS -->
-<section id="trustDimensionsPanel" class="card wide hidden">
-  <h3>Trust Dimension Analysis</h3>
-  <div id="trustDimensions"></div>
-</section>
+    <section id="trustDimensionsPanel" class="card wide hidden">
+      <h3>Trust Dimension Analysis</h3>
+      <div id="trustDimensions"></div>
+    </section>
 
 
     <!-- GRID -->
@@ -147,11 +137,11 @@
         <h3>Public Intelligence Sources</h3>
         <ul id="sources"></ul>
       </div>
-<!-- POLICY MISMATCH -->
-<section id="policyMismatchPanel" class="card wide hidden">
-  <h3>Policy Enforcement Gaps</h3>
-  <ul id="policyMismatches"></ul>
-</section>
+      <!-- POLICY MISMATCH -->
+      <section id="policyMismatchPanel" class="card wide hidden">
+        <h3>Policy Enforcement Gaps</h3>
+        <ul id="policyMismatches"></ul>
+      </section>
       <div class="card wide highlight fade delay5">
         <h3>AI Trust Explanation</h3>
         <p id="aiExplanation"></p>
@@ -164,12 +154,7 @@
             <span class="log-dot"></span>
             <span>Live Processing Log</span>
           </div>
-          <button
-            id="downloadLogsBtn"
-            type="button"
-            class="ghost-btn"
-            onclick="downloadLogs()"
-          >
+          <button id="downloadLogsBtn" type="button" class="ghost-btn" onclick="downloadLogs()">
             Download logs
           </button>
         </header>
@@ -177,49 +162,46 @@
           <div id="logList" class="log-list"></div>
         </div>
       </section>
-<!-- REFERENCES MODAL -->
-<div id="referenceModal" class="modal hidden">
-  <div class="modal-overlay"></div>
+      <!-- REFERENCES MODAL -->
+      <div id="referenceModal" class="modal hidden">
+        <div class="modal-overlay"></div>
 
-  <div class="modal-content">
-    <h3 id="modalTitle">References</h3>
-    <ul id="modalLinks"></ul>
+        <div class="modal-content">
+          <h3 id="modalTitle">References</h3>
+          <ul id="modalLinks"></ul>
 
-    <button
-      id="closeModalBtn"
-      type="button"
-      class="close-btn">
-      Close
-    </button>
-  </div>
-</div>
-<!-- Trust Dimension Modal -->
-<div id="dimensionModal" class="modal hidden">
-  <div class="modal-overlay" onclick="closeDimensionModal()"></div>
-
-  <div class="modal-card">
-    <div class="modal-header">
-      <div>
-        <h3 id="dimensionModalTitle">Trust Dimension</h3>
-        <span id="dimensionStatus" class="status-badge">Moderate</span>
+          <button id="closeModalBtn" type="button" class="close-btn">
+            Close
+          </button>
+        </div>
       </div>
-      <button class="modal-close" onclick="closeDimensionModal()">✕</button>
-    </div>
+      <!-- Trust Dimension Modal -->
+      <div id="dimensionModal" class="modal hidden">
+        <div class="modal-overlay" onclick="closeDimensionModal()"></div>
 
-    <div class="modal-body">
-      <p id="dimensionModalBody">
-        Explanation will appear here.
-      </p>
-    </div>
+        <div class="modal-card">
+          <div class="modal-header">
+            <div>
+              <h3 id="dimensionModalTitle">Trust Dimension</h3>
+              <span id="dimensionStatus" class="status-badge">Moderate</span>
+            </div>
+            <button class="modal-close" onclick="closeDimensionModal()">✕</button>
+          </div>
 
-    <div class="modal-footer">
-      <span class="modal-hint">
-        Based on OSINT, infrastructure, policy, and user experience signals
-      </span>
-      <button class="primary-btn" onclick="closeDimensionModal()">Close</button>
-    </div>
-  </div>
-</div>
+          <div class="modal-body">
+            <p id="dimensionModalBody">
+              Explanation will appear here.
+            </p>
+          </div>
+
+          <div class="modal-footer">
+            <span class="modal-hint">
+              Based on OSINT, infrastructure, policy, and user experience signals
+            </span>
+            <button class="primary-btn" onclick="closeDimensionModal()">Close</button>
+          </div>
+        </div>
+      </div>
 
 
 
@@ -231,4 +213,5 @@
 
   <script src="/static/js/main.js"></script>
 </body>
+
 </html>
