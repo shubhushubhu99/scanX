@@ -2,5 +2,5 @@ python-whois
 requests
 beautifulsoup4
 flask
-dotenv
+python-dotenv
 google-genai
