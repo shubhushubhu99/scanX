@@ -50,8 +50,12 @@ function startScan(mode = "deep") {
         return;
       }
 
-      render(data);
-      completeScanUI(true, data);
+      if (data.task_id) {
+        pollTaskStatus(data.task_id);
+      } else {
+        render(data);
+        completeScanUI(true, data);
+      }
     })
     .catch(err => {
       console.error(err);
@@ -63,7 +67,6 @@ function startScan(mode = "deep") {
 
 /* =======================
    RISK LEVEL -> CSS CLASS
-======================= */
 function getRiskClass(riskLevelText) {
   const level = (riskLevelText || "").toLowerCase();
 
