@@ -61,6 +61,24 @@ function startScan(mode = "deep") {
     });
 }
 
+/* =======================
+   RISK LEVEL -> CSS CLASS
+======================= */
+function getRiskClass(riskLevelText) {
+  const level = (riskLevelText || "").toLowerCase();
+
+  if (level.includes("low")) {
+    return "risk-low";
+  }
+  if (level.includes("moderate") || level.includes("medium")) {
+    return "risk-moderate";
+  }
+  if (level.includes("high")) {
+    return "risk-high";
+  }
+  return null;
+}
+
 function render(data) {
   // SAFETY CHECK
   if (!data) return;
@@ -95,6 +113,17 @@ function render(data) {
     ? baselineRisk.reason
     : "Risk explanation unavailable.";
 
+  // Apply color coding to the verdict card based on risk level
+  const verdictCard = verdictEl.closest(".verdict");
+  if (verdictCard) {
+    verdictCard.classList.remove("risk-low", "risk-moderate", "risk-high");
+
+    const riskClass = getRiskClass(baselineRisk ? baselineRisk.risk_level : "");
+    if (riskClass) {
+      verdictCard.classList.add(riskClass);
+    }
+  }
+
   /* =======================
      STRENGTHS
   ======================= */
@@ -105,18 +134,18 @@ function render(data) {
     data.live?.signals?.has_terms && "Terms & conditions available"
   ]);
 
-/* =======================
-   KEY CONCERNS
-======================= */
-const concernsEl = document.getElementById("concerns");
-concernsEl.innerHTML = "";
-let concernCount = 0;
+  /* =======================
+     KEY CONCERNS
+  ======================= */
+  const concernsEl = document.getElementById("concerns");
+  concernsEl.innerHTML = "";
+  let concernCount = 0;
 
-if (data.experience) {
-  Object.entries(data.experience).forEach(([key, value]) => {
-    if (value.count >= 3) {
-      concernCount += 1;
-      concernsEl.innerHTML += `
+  if (data.experience) {
+    Object.entries(data.experience).forEach(([key, value]) => {
+      if (value.count >= 3) {
+        concernCount += 1;
+        concernsEl.innerHTML += `
         <li>
           <strong>${key.replace(/_/g, " ")}</strong>
           (${value.count} mentions)
@@ -127,9 +156,9 @@ if (data.experience) {
           </button>
         </li>
       `;
-    }
-  });
-}
+      }
+    });
+  }
 
 
   /* =======================
@@ -219,8 +248,8 @@ if (data.experience) {
         value.severity === "High"
           ? "policy-high"
           : value.severity === "Medium"
-          ? "policy-medium"
-          : "policy-low";
+            ? "policy-medium"
+            : "policy-low";
 
       mismatchList.innerHTML += `
         <li class="policy-item ${cls}">
@@ -252,7 +281,7 @@ if (data.experience) {
       const statusClass =
         "status-" + value.status.toLowerCase().replace(/\s+/g, "-");
 
-  trustBox.innerHTML += `
+      trustBox.innerHTML += `
     <div class="trust-row clickable"
        data-dimension="${key}"
        data-status="${value.status}"
@@ -513,18 +542,18 @@ function beginScanUI(mode) {
   const steps =
     mode === "analyze"
       ? [
-          "Initializing lightweight trust checks",
-          "Collecting surface OSINT signals",
-          "Evaluating basic risk posture",
-          "Summarizing high-level verdict",
-        ]
+        "Initializing lightweight trust checks",
+        "Collecting surface OSINT signals",
+        "Evaluating basic risk posture",
+        "Summarizing high-level verdict",
+      ]
       : [
-          "Bootstrapping deep scan pipeline",
-          "Enumerating OSINT and infra sources",
-          "Inspecting content, policy and UX signals",
-          "Running risk engine across trust dimensions",
-          "Aggregating AI explanation and references",
-        ];
+        "Bootstrapping deep scan pipeline",
+        "Enumerating OSINT and infra sources",
+        "Inspecting content, policy and UX signals",
+        "Running risk engine across trust dimensions",
+        "Aggregating AI explanation and references",
+      ];
 
   let stepIndex = 0;
   scanState.logIntervalId = window.setInterval(() => {
@@ -634,20 +663,20 @@ function explainTrustDimension(dimension, status, signals) {
     })
   })
     .then(res => res.json())
-.then(data => {
-  document.getElementById("dimensionModalTitle").innerText =
-    dimension.replace(/_/g, " ");
+    .then(data => {
+      document.getElementById("dimensionModalTitle").innerText =
+        dimension.replace(/_/g, " ");
 
-  document.getElementById("dimensionModalBody").innerText =
-    data.explanation;
+      document.getElementById("dimensionModalBody").innerText =
+        data.explanation;
 
-  const badge = document.getElementById("dimensionStatus");
-  badge.innerText = status;
-  badge.className = "status-badge " + status.toLowerCase();
+      const badge = document.getElementById("dimensionStatus");
+      badge.innerText = status;
+      badge.className = "status-badge " + status.toLowerCase();
 
-  document.getElementById("dimensionModal")
-    .classList.remove("hidden");
-});
+      document.getElementById("dimensionModal")
+        .classList.remove("hidden");
+    });
 
 }
 
