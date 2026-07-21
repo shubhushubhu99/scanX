@@ -481,17 +481,6 @@ button {
   color: var(--muted);
 }
 
-/* NEW SCAN / RESET BUTTON */
-#newScanBtn {
-  border-color: rgba(148, 163, 184, 0.5);
-  color: var(--text);
-}
-
-#newScanBtn:hover:not(:disabled) {
-  border-color: rgba(148, 163, 184, 0.8);
-  background: rgba(148, 163, 184, 0.08);
-}
-
 /* VERDICT RISK LEVEL COLOR CODING */
 .verdict.risk-low {
   background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.3), rgba(15, 23, 42, 0.95));
@@ -1214,101 +1203,5 @@ li {
 
   .verdict {
     padding-inline: 18px;
-  }
-}
-
-/* ==========================================================================
-   scanX UI/UX Enhancement - ECSoC 2026
-   ========================================================================== */
-
-/* Features Section Layout */
-.features-section {
-  padding: 4rem 2rem 6rem 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.section-title h2 {
-  font-size: 2.2rem;
-  color: #ffffff;
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-}
-
-.section-title p {
-  color: #94a3b8;
-  /* Slate gray placeholder color */
-  font-size: 1.1rem;
-  margin-bottom: 3rem;
-}
-
-/* 4-Column Responsive Grid */
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-/* Modern Dark-Theme Security Cards */
-.feature-card {
-  background: rgba(30, 41, 59, 0.4);
-  /* Glassmorphism effect */
-  border: 1px solid #334155;
-  border-radius: 16px;
-  padding: 2.5rem 1.5rem;
-  text-align: center;
-
-  /* Smooth transition for modern micro-interactions */
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s ease,
-    box-shadow 0.4s ease;
-}
-
-/* Icon Wrapper Styling */
-.icon-wrapper {
-  font-size: 2.5rem;
-  margin-bottom: 1.25rem;
-  display: inline-block;
-}
-
-.feature-card h3 {
-  font-size: 1.25rem;
-  color: #f8fafc;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
-}
-
-.feature-card p {
-  color: #94a3b8;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-/* Interactive Hover States */
-.feature-card:hover {
-  transform: translateY(-8px);
-  border-color: #3b82f6;
-  /* Cyber Blue Security Edge */
-  background: rgba(30, 41, 59, 0.7);
-  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.25);
-  cursor: pointer;
-}
-
-/* Mobile & Tablet Responsiveness Adjustments */
-@media (max-width: 768px) {
-  .section-title h2 {
-    font-size: 1.8rem;
-  }
-
-  .features-grid {
-    grid-template-columns: 1fr;
-    /* Stack vertically on small screens */
-    gap: 1.5rem;
-  }
-
-  .feature-card {
-    padding: 2rem 1.25rem;
   }
 }

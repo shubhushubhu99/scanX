@@ -16,13 +16,25 @@ def collect_public_signals(domain: str) -> dict:
     """
     Collect Google-indexed public evidence about a domain.
     Returns raw evidence + counts + strength.
+
+    Each platform query runs independently - if one platform
+    times out or fails, the others still complete instead of
+    failing the entire scan.
     """
     evidence = {}
     total_mentions = 0
+    failed_platforms = []
 
     for platform, template in PLATFORM_QUERIES.items():
         query = template.format(domain=domain)
-        results = google_search(query, num_results=5)
+
+        try:
+            results = google_search(query, num_results=5)
+        except Exception as e:
+            # Log and skip this platform instead of failing the whole scan
+            print(f"[reputation] {platform} query failed: {e}")
+            failed_platforms.append(platform)
+            continue
 
         if results:
             evidence[platform] = results
@@ -44,5 +56,6 @@ def collect_public_signals(domain: str) -> dict:
         "total_mentions": total_mentions,
         "evidence_strength": strength,
         "platforms_checked": list(PLATFORM_QUERIES.keys()),
-        "platforms_with_mentions": list(evidence.keys())
+        "platforms_with_mentions": list(evidence.keys()),
+        "platforms_failed": failed_platforms
     }
