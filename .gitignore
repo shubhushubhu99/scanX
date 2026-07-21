@@ -59,4 +59,5 @@ Thumbs.db
 .dmypy.json
 
 # ── Personal/test scripts ──
-test_gemini.py
+test_gemini.py__pycache__/
+*.pyc
