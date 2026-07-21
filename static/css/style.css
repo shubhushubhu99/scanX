@@ -67,7 +67,16 @@ body::before {
 
 .brand {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.brand-logo {
+  height: 68px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .brand .logo {
@@ -83,6 +92,7 @@ body::before {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--muted);
+  flex-basis: 100%;
 }
 
 .top-meta {
